@@ -1,0 +1,3895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOT Grievance Student System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+/* =========================
+   GLOBAL
+========================= */
+
+:root {
+    --bg: #07111F;
+    --surface: #0E1D2E;
+    --surface2: #152637;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+
+    --text: #E8EEF6;
+    --muted: #6C86A1;
+
+    --blue: #2D8CFF;
+    --green: #00D4AA;
+
+    --yellow: #F59E0B;
+    --purple: #8B5CF6;
+    --red: #EF4444;
+    --success: #10B981;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface2);
+    border-radius: 10px;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.nav {
+    height: 62px;
+    padding: 0 2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    background: rgba(7,17,31,0.9);
+    backdrop-filter: blur(20px);
+
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+
+    color: white;
+}
+
+.logo-badge {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        var(--blue),
+        var(--green)
+    );
+
+    font-family: 'DM Mono', monospace;
+    font-weight: bold;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn {
+    padding: 9px 18px;
+
+    border-radius: 8px;
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: 0.2s;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(
+        135deg,
+        var(--blue),
+        var(--green)
+    );
+
+    color: white;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border2);
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.11);
+}
+
+.btn-admin {
+    background: rgba(239,68,68,0.12);
+    color: #FF7885;
+
+    border: 1px solid rgba(239,68,68,0.3);
+}
+
+.btn-admin:hover {
+    background: rgba(239,68,68,0.2);
+}
+
+.btn-large {
+    padding: 13px 28px;
+    font-size: 16px;
+}
+
+/* =========================
+   PAGES
+========================= */
+
+.page {
+    display: none;
+    min-height: calc(100vh - 62px);
+}
+
+.page.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* =========================
+   LANDING PAGE
+========================= */
+
+.hero {
+    max-width: 900px;
+    margin: auto;
+
+    text-align: center;
+
+    padding: 80px 20px 60px;
+}
+
+.hero-tag {
+    display: inline-block;
+
+    padding: 7px 18px;
+
+    border-radius: 50px;
+
+    background: rgba(45,140,255,0.1);
+    border: 1px solid rgba(45,140,255,0.3);
+
+    color: var(--blue);
+
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+
+    font-size: clamp(40px, 6vw, 62px);
+
+    line-height: 1.1;
+
+    margin-bottom: 20px;
+
+    background: linear-gradient(
+        135deg,
+        white 40%,
+        #6AB4FF
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+    max-width: 600px;
+
+    margin: auto auto 35px;
+
+    color: var(--muted);
+
+    line-height: 1.8;
+
+    font-size: 16px;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+
+    flex-wrap: wrap;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats {
+    max-width: 900px;
+
+    margin: 0 auto 60px;
+
+    padding: 0 20px;
+
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+
+    gap: 15px;
+}
+
+.stat-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 25px;
+
+    margin-bottom: 8px;
+}
+
+.stat-number {
+    font-family: 'Playfair Display', serif;
+
+    font-size: 38px;
+
+    font-weight: 800;
+
+    color: white;
+}
+
+.stat-label {
+    color: var(--muted);
+
+    font-size: 12px;
+
+    margin-top: 5px;
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+    max-width: 900px;
+
+    margin: auto;
+
+    padding: 0 20px 70px;
+
+    display: grid;
+
+    grid-template-columns: repeat(3,1fr);
+
+    gap: 15px;
+}
+
+.feature {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 22px;
+}
+
+.feature-icon {
+    font-size: 28px;
+
+    margin-bottom: 12px;
+}
+
+.feature h3 {
+    font-family: 'Playfair Display', serif;
+
+    color: white;
+
+    margin-bottom: 8px;
+}
+
+.feature p {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+.login-wrapper {
+    min-height: calc(100vh - 62px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 430px;
+
+    padding: 40px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    animation: fadeUp 0.4s ease;
+}
+
+.login-card h2 {
+    font-family: 'Playfair Display', serif;
+
+    color: white;
+
+    font-size: 28px;
+
+    margin-bottom: 5px;
+}
+
+.login-card > p {
+    color: var(--muted);
+
+    font-size: 14px;
+
+    margin-bottom: 30px;
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    display: block;
+
+    color: #9BB2C8;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    margin-bottom: 7px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid var(--border2);
+
+    border-radius: 9px;
+
+    color: var(--text);
+
+    outline: none;
+
+    font-size: 14px;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--blue);
+}
+
+.form-textarea {
+    resize: vertical;
+}
+
+.form-select option {
+    background: var(--surface);
+}
+
+.demo {
+    margin-top: 20px;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    background: rgba(45,140,255,0.08);
+
+    color: #6AB4FF;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+/* =========================
+   PORTAL
+========================= */
+
+.portal {
+    display: flex;
+
+    height: calc(100vh - 62px);
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 215px;
+
+    flex-shrink: 0;
+
+    background: var(--surface);
+
+    border-right: 1px solid var(--border);
+
+    padding: 20px 12px;
+}
+
+.sidebar-title {
+    color: var(--muted);
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 10px;
+
+    padding: 0 10px;
+}
+
+.nav-item {
+    width: 100%;
+
+    padding: 11px;
+
+    margin-bottom: 3px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    border: 1px solid transparent;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    font-size: 14px;
+}
+
+.nav-item:hover {
+    color: white;
+
+    background: rgba(255,255,255,0.04);
+}
+
+.nav-item.active {
+    color: #6AB4FF;
+
+    background: rgba(45,140,255,0.1);
+
+    border-color: rgba(45,140,255,0.25);
+}
+
+/* MAIN CONTENT */
+
+.main {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 35px;
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h2 {
+    font-family: 'Playfair Display', serif;
+
+    color: white;
+
+    font-size: 28px;
+
+    margin-bottom: 5px;
+}
+
+.page-header p {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard-stats {
+    display: grid;
+
+    grid-template-columns: repeat(4,1fr);
+
+    gap: 15px;
+
+    margin-bottom: 30px;
+}
+
+.dashboard-stat {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 13px;
+
+    padding: 20px;
+}
+
+.dashboard-stat-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+}
+
+.dashboard-value {
+    font-family: 'Playfair Display', serif;
+
+    font-size: 30px;
+
+    color: white;
+}
+
+.dashboard-label {
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.stat-line {
+    height: 3px;
+
+    border-radius: 20px;
+
+    margin-top: 15px;
+
+    background: linear-gradient(
+        90deg,
+        var(--blue),
+        var(--green)
+    );
+}
+
+/* =========================
+   GRIEVANCE CARDS
+========================= */
+
+.grievance-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.grievance-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.grievance-card:hover {
+    background: var(--surface2);
+
+    border-color: rgba(45,140,255,0.35);
+
+    transform: translateY(-1px);
+}
+
+.grievance-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 10px;
+}
+
+.grievance-id {
+    color: var(--blue);
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 12px;
+
+    margin-bottom: 4px;
+}
+
+.grievance-title {
+    color: white;
+
+    font-family: 'Playfair Display', serif;
+
+    font-size: 16px;
+}
+
+.grievance-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 15px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+}
+
+.pending {
+    background: rgba(245,158,11,0.15);
+    color: #F59E0B;
+}
+
+.pending .dot {
+    background: #F59E0B;
+}
+
+.review {
+    background: rgba(59,130,246,0.15);
+    color: #60A5FA;
+}
+
+.review .dot {
+    background: #60A5FA;
+}
+
+.progress {
+    background: rgba(139,92,246,0.15);
+    color: #A78BFA;
+}
+
+.progress .dot {
+    background: #A78BFA;
+}
+
+.resolved {
+    background: rgba(16,185,129,0.15);
+    color: #34D399;
+}
+
+.resolved .dot {
+    background: #34D399;
+}
+
+.rejected {
+    background: rgba(239,68,68,0.15);
+    color: #F87171;
+}
+
+.rejected .dot {
+    background: #F87171;
+}
+
+/* PRIORITY */
+
+.high {
+    color: #F87171;
+}
+
+.medium {
+    color: #FBBF24;
+}
+
+.low {
+    color: #34D399;
+}
+
+/* =========================
+   TRACK PAGE
+========================= */
+
+.track {
+    max-width: 650px;
+
+    margin: 70px auto;
+
+    padding: 20px;
+}
+
+.track h2 {
+    font-family: 'Playfair Display', serif;
+
+    color: white;
+
+    font-size: 32px;
+
+    margin-bottom: 5px;
+}
+
+.track > p {
+    color: var(--muted);
+
+    margin-bottom: 25px;
+}
+
+.track-row {
+    display: flex;
+
+    gap: 10px;
+}
+
+.sample {
+    margin-top: 25px;
+
+    background: var(--surface);
+
+    border-radius: 12px;
+
+    padding: 18px;
+}
+
+.sample p {
+    color: var(--muted);
+
+    font-size: 12px;
+
+    margin-bottom: 10px;
+}
+
+.sample-buttons {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.sample button {
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid var(--border2);
+
+    color: var(--text);
+
+    padding: 7px 10px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 11px;
+}
+
+.not-found {
+    margin-top: 20px;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    background: rgba(239,68,68,0.08);
+
+    border: 1px solid rgba(239,68,68,0.25);
+
+    color: #F87171;
+
+    text-align: center;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.75);
+
+    backdrop-filter: blur(6px);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 500;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+
+    max-width: 600px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #0B192A;
+
+    border: 1px solid var(--border2);
+
+    border-radius: 20px;
+
+    padding: 30px;
+}
+
+.modal-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.modal-id {
+    color: var(--blue);
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 12px;
+}
+
+.modal-title {
+    color: white;
+
+    font-family: 'Playfair Display', serif;
+
+    font-size: 23px;
+
+    margin-top: 4px;
+}
+
+.close {
+    background: none;
+
+    border: none;
+
+    color: var(--muted);
+
+    font-size: 20px;
+
+    cursor: pointer;
+}
+
+.modal-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-bottom: 20px;
+}
+
+.meta {
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid var(--border);
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.modal-description {
+    color: #8BA8C4;
+
+    line-height: 1.7;
+
+    font-size: 14px;
+
+    margin-bottom: 20px;
+}
+
+.admin-note {
+    padding: 15px;
+
+    background: rgba(45,140,255,0.08);
+
+    border: 1px solid rgba(45,140,255,0.2);
+
+    border-radius: 10px;
+
+    color: #93C5FD;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.admin-note strong {
+    display: block;
+
+    color: var(--blue);
+
+    font-size: 10px;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 5px;
+}
+
+/* =========================
+   FILTER
+========================= */
+
+.filters {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+
+    flex-wrap: wrap;
+}
+
+.filters input {
+    max-width: 250px;
+}
+
+/* =========================
+   REPORTS
+========================= */
+
+.reports {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.report-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 22px;
+}
+
+.report-card.full {
+    grid-column: 1 / -1;
+}
+
+.report-card h3 {
+    font-family: 'Playfair Display', serif;
+
+    color: white;
+
+    margin-bottom: 20px;
+}
+
+.bar-row {
+    margin-bottom: 15px;
+}
+
+.bar-info {
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #9BB2C8;
+
+    font-size: 12px;
+
+    margin-bottom: 5px;
+}
+
+.bar {
+    height: 6px;
+
+    background: rgba(255,255,255,0.07);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+
+    background: linear-gradient(
+        90deg,
+        var(--blue),
+        var(--green)
+    );
+
+    border-radius: 20px;
+}
+
+.priority-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3,1fr);
+
+    gap: 12px;
+}
+
+.priority-box {
+    padding: 20px;
+
+    border-radius: 12px;
+
+    text-align: center;
+
+    background: rgba(255,255,255,0.04);
+}
+
+.priority-number {
+    font-family: 'Playfair Display', serif;
+
+    font-size: 32px;
+
+    color: white;
+}
+
+.priority-label {
+    font-size: 12px;
+
+    margin-top: 5px;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty {
+    text-align: center;
+
+    padding: 60px 20px;
+
+    color: var(--muted);
+}
+
+.empty-icon {
+    font-size: 50px;
+
+    margin-bottom: 10px;
+}
+
+/* =========================
+   NOTIFICATION
+========================= */
+
+#notification {
+    position: fixed;
+
+    top: 80px;
+    right: 20px;
+
+    z-index: 1000;
+
+    display: none;
+
+    padding: 14px 20px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+#notification.show {
+    display: block;
+}
+
+.notification-success {
+    background: #0D3D26;
+
+    border: 1px solid rgba(16,185,129,0.4);
+
+    color: #34D399;
+}
+
+.notification-error {
+    background: #3D0D0D;
+
+    border: 1px solid rgba(239,68,68,0.4);
+
+    color: #F87171;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:800px) {
+
+    .stats,
+    .dashboard-stats {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .reports {
+        grid-template-columns: 1fr;
+    }
+
+    .report-card.full {
+        grid-column: auto;
+    }
+
+    .sidebar {
+        width: 180px;
+    }
+
+    .main {
+        padding: 20px;
+    }
+}
+
+@media(max-width:600px) {
+
+    .nav {
+        padding: 0 12px;
+    }
+
+    .logo {
+        font-size: 14px;
+    }
+
+    .nav-actions .btn {
+        padding: 7px 10px;
+        font-size: 11px;
+    }
+
+    .portal {
+        flex-direction: column;
+
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+
+        display: flex;
+
+        overflow-x: auto;
+
+        padding: 10px;
+    }
+
+    .sidebar-title {
+        display: none;
+    }
+
+    .nav-item {
+        width: auto;
+
+        white-space: nowrap;
+    }
+
+    .hero {
+        padding-top: 50px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .track-row {
+        flex-direction: column;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     NOTIFICATION
+========================= -->
+
+<div id="notification"></div>
+
+
+<!-- =========================
+     NAVBAR
+========================= -->
+
+<nav class="nav">
+
+    <div class="logo">
+
+        <div class="logo-badge">
+            S
+        </div>
+
+        SOT Grievance Portal
+
+    </div>
+
+    <div class="nav-actions" id="navActions">
+
+        <button
+            class="btn btn-secondary"
+            onclick="showPage('track')">
+            Track Grievance
+        </button>
+
+        <button
+            class="btn btn-primary"
+            onclick="showPage('login')">
+            Student Login
+        </button>
+
+        <button
+            class="btn btn-admin"
+            onclick="adminLogin()">
+            Admin Access
+        </button>
+
+    </div>
+
+</nav>
+
+
+<!-- =========================
+     LANDING PAGE
+========================= -->
+
+<section
+    id="page-landing"
+    class="page active">
+
+    <div class="hero">
+
+        <div class="hero-tag">
+            School of Technology · Grievance System
+        </div>
+
+        <h1>
+            Student Grievance<br>
+            Redressal System
+        </h1>
+
+        <p>
+            A transparent, efficient platform to submit,
+            track, and resolve academic and administrative
+            grievances — digitised for speed and accountability.
+        </p>
+
+        <div class="hero-buttons">
+
+            <button
+                class="btn btn-primary btn-large"
+                onclick="showPage('login')">
+                Submit a Grievance
+            </button>
+
+            <button
+                class="btn btn-secondary btn-large"
+                onclick="showPage('track')">
+                Track Your Complaint
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <div
+                class="stat-number"
+                id="totalStat">
+                0
+            </div>
+
+            <div class="stat-label">
+                Total Grievances
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <div
+                class="stat-number"
+                id="pendingStat">
+                0
+            </div>
+
+            <div class="stat-label">
+                Pending Review
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🔄
+            </div>
+
+            <div
+                class="stat-number"
+                id="progressStat">
+                0
+            </div>
+
+            <div class="stat-label">
+                In Progress
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✅
+            </div>
+
+            <div
+                class="stat-number"
+                id="resolvedStat">
+                0
+            </div>
+
+            <div class="stat-label">
+                Resolved
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FEATURES -->
+
+    <div class="features">
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                🔐
+            </div>
+
+            <h3>
+                Secure Submission
+            </h3>
+
+            <p>
+                Every grievance gets a unique tracking ID
+                for complete accountability and privacy.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📡
+            </div>
+
+            <h3>
+                Real-time Tracking
+            </h3>
+
+            <p>
+                Monitor your complaint status at every
+                stage of the resolution process.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                ⚡
+            </div>
+
+            <h3>
+                Faster Resolution
+            </h3>
+
+            <p>
+                Digitised workflow ensures quicker
+                response times and fewer delays.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📊
+            </div>
+
+            <h3>
+                Transparent Process
+            </h3>
+
+            <p>
+                Clear communication and updates
+                at every step of the redressal.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📁
+            </div>
+
+            <h3>
+                Record Keeping
+            </h3>
+
+            <p>
+                All grievances documented and archived
+                for reporting and accountability.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                🤝
+            </div>
+
+            <h3>
+                Direct Channel
+            </h3>
+
+            <p>
+                Bridge between students and SOT authorities
+                for faster action.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     TRACK PAGE
+========================= -->
+
+<section
+    id="page-track"
+    class="page">
+
+    <div class="track">
+
+        <button
+            class="btn btn-secondary"
+            onclick="showPage('landing')">
+            ← Back
+        </button>
+
+        <br><br>
+
+        <h2>
+            Track Your Grievance
+        </h2>
+
+        <p>
+            Enter your grievance ID to check
+            the current status.
+        </p>
+
+        <div class="track-row">
+
+            <input
+                class="form-input"
+                id="trackInput"
+                placeholder="e.g. SOT-2024-001"
+                onkeydown="
+                    if(event.key==='Enter')
+                    trackGrievance()
+                ">
+
+            <button
+                class="btn btn-primary"
+                onclick="trackGrievance()">
+                Track
+            </button>
+
+        </div>
+
+        <div id="trackResult"></div>
+
+
+        <div class="sample">
+
+            <p>
+                Try these sample IDs:
+            </p>
+
+            <div
+                class="sample-buttons"
+                id="sampleButtons">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     LOGIN PAGE
+========================= -->
+
+<section
+    id="page-login"
+    class="page">
+
+    <div class="login-wrapper">
+
+        <div class="login-card">
+
+            <button
+                class="btn btn-secondary"
+                onclick="showPage('landing')">
+                ← Back
+            </button>
+
+            <br><br>
+
+            <h2>
+                Student Login
+            </h2>
+
+            <p>
+                Enter your details to access
+                the grievance portal.
+            </p>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Full Name
+                </label>
+
+                <input
+                    class="form-input"
+                    id="loginName"
+                    placeholder="e.g. Aryan Sharma">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Roll Number
+                </label>
+
+                <input
+                    class="form-input"
+                    id="loginRoll"
+                    placeholder="e.g. 21SOT001">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Email Address
+                </label>
+
+                <input
+                    class="form-input"
+                    id="loginEmail"
+                    type="email"
+                    placeholder="e.g. student@sot.edu">
+
+            </div>
+
+
+            <button
+                class="btn btn-primary"
+                style="width:100%; padding:13px"
+                onclick="studentLogin()">
+
+                Access Portal →
+
+            </button>
+
+
+            <div class="demo">
+
+                💡 <strong>Demo:</strong>
+
+                Use Roll No
+                <b>21SOT001</b>
+                to see the pre-loaded grievance.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     PORTAL
+========================= -->
+
+<section
+    id="page-portal"
+    class="page">
+
+    <div class="portal">
+
+        <aside
+            class="sidebar"
+            id="sidebar">
+        </aside>
+
+        <main
+            class="main"
+            id="mainContent">
+        </main>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     MODAL
+========================= -->
+
+<div
+    class="modal-overlay"
+    id="modal"
+    onclick="closeModal(event)">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <div
+                    class="modal-id"
+                    id="modalId">
+                </div>
+
+                <div
+                    class="modal-title"
+                    id="modalTitle">
+                </div>
+
+            </div>
+
+            <button
+                class="close"
+                onclick="closeModal()">
+                ✕
+            </button>
+
+        </div>
+
+
+        <div
+            class="modal-meta"
+            id="modalMeta">
+        </div>
+
+
+        <div
+            class="modal-description"
+            id="modalDescription">
+        </div>
+
+
+        <div id="modalAdminNote"></div>
+
+
+        <div id="modalUpdate"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   DATA
+===================================================== */
+
+let grievances = [
+
+    {
+        id: "SOT-2024-001",
+
+        studentName: "Aryan Sharma",
+
+        rollNo: "21SOT001",
+
+        category: "Academic",
+
+        title: "Internal marks not updated",
+
+        description:
+        "My internal assessment marks for Data Structures have not been updated on the portal despite submission 2 weeks ago.",
+
+        status: "Under Review",
+
+        date: "2024-03-01",
+
+        adminNote:
+        "Checked with faculty, updating records shortly.",
+
+        priority: "High"
+    },
+
+
+    {
+        id: "SOT-2024-002",
+
+        studentName: "Priya Mehta",
+
+        rollNo: "21SOT042",
+
+        category: "Infrastructure",
+
+        title: "Projector not working in Lab 3",
+
+        description:
+        "The projector in Computer Lab 3 has been non-functional for over a week, severely affecting practical sessions.",
+
+        status: "In Progress",
+
+        date: "2024-03-03",
+
+        adminNote:
+        "Maintenance team notified and scheduled.",
+
+        priority: "Medium"
+    },
+
+
+    {
+        id: "SOT-2024-003",
+
+        studentName: "Rohan Das",
+
+        rollNo: "22SOT011",
+
+        category: "Examination",
+
+        title: "Wrong answer sheet evaluated",
+
+        description:
+        "I believe my answer sheet was evaluated incorrectly. I had written detailed answers but received very low marks in the end-semester exam.",
+
+        status: "Pending",
+
+        date: "2024-03-05",
+
+        adminNote: "",
+
+        priority: "High"
+    },
+
+
+    {
+        id: "SOT-2024-004",
+
+        studentName: "Sneha Patel",
+
+        rollNo: "21SOT078",
+
+        category: "Financial",
+
+        title: "Scholarship amount not credited",
+
+        description:
+        "My merit scholarship for the current semester has not been credited to my account despite receiving the official approval letter.",
+
+        status: "Resolved",
+
+        date: "2024-02-20",
+
+        adminNote:
+        "Amount has been successfully credited. Issue fully resolved.",
+
+        priority: "High"
+    }
+
+];
+
+
+let idCounter = 5;
+
+let currentUser = null;
+
+let currentTab = "dashboard";
+
+
+const CATEGORIES = [
+    "Academic",
+    "Administrative",
+    "Examination",
+    "Faculty",
+    "Infrastructure",
+    "Financial",
+    "Personal",
+    "Other"
+];
+
+
+const STATUS_LIST = [
+    "Pending",
+    "Under Review",
+    "In Progress",
+    "Resolved",
+    "Rejected"
+];
+
+
+/* =====================================================
+   NOTIFICATION
+===================================================== */
+
+function notify(message, type = "success") {
+
+    const notification =
+        document.getElementById("notification");
+
+    notification.textContent =
+        type === "error"
+        ? "⚠️ " + message
+        : "✅ " + message;
+
+    notification.className =
+        type === "error"
+        ? "show notification-error"
+        : "show notification-success";
+
+    setTimeout(() => {
+
+        notification.className = "";
+
+    }, 3500);
+}
+
+
+/* =====================================================
+   PAGE NAVIGATION
+===================================================== */
+
+function showPage(pageName) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+
+            page.classList.remove("active");
+
+        });
+
+
+    document
+        .getElementById("page-" + pageName)
+        .classList.add("active");
+
+
+    if (pageName === "landing") {
+
+        updateLandingStats();
+
+    }
+
+
+    if (pageName === "track") {
+
+        renderSampleButtons();
+
+    }
+
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+function getStats(list) {
+
+    return {
+
+        total: list.length,
+
+        pending:
+        list.filter(
+            g => g.status === "Pending"
+        ).length,
+
+        progress:
+        list.filter(
+            g =>
+            g.status === "In Progress" ||
+            g.status === "Under Review"
+        ).length,
+
+        resolved:
+        list.filter(
+            g => g.status === "Resolved"
+        ).length
+
+    };
+
+}
+
+
+function updateLandingStats() {
+
+    const stats = getStats(grievances);
+
+    document.getElementById("totalStat")
+        .textContent = stats.total;
+
+    document.getElementById("pendingStat")
+        .textContent = stats.pending;
+
+    document.getElementById("progressStat")
+        .textContent = stats.progress;
+
+    document.getElementById("resolvedStat")
+        .textContent = stats.resolved;
+
+}
+
+
+/* =====================================================
+   USER GRIEVANCES
+===================================================== */
+
+function myGrievances() {
+
+    if (!currentUser)
+        return [];
+
+    if (currentUser.isAdmin)
+        return grievances;
+
+    return grievances.filter(
+        g => g.rollNo === currentUser.rollNo
+    );
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+function studentLogin() {
+
+    const name =
+        document.getElementById("loginName")
+        .value.trim();
+
+    const roll =
+        document.getElementById("loginRoll")
+        .value.trim();
+
+    const email =
+        document.getElementById("loginEmail")
+        .value.trim();
+
+
+    if (!name || !roll || !email) {
+
+        notify(
+            "Please fill all fields.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    currentUser = {
+
+        name: name,
+
+        rollNo: roll,
+
+        email: email,
+
+        isAdmin: false
+
+    };
+
+
+    updateNavbar();
+
+    showPage("portal");
+
+    renderSidebar();
+
+    renderTab("dashboard");
+
+
+    notify(
+        "Welcome, " + name + "!"
+    );
+
+}
+
+
+function adminLogin() {
+
+    currentUser = {
+
+        name: "Administrator",
+
+        rollNo: "ADMIN",
+
+        email: "admin@sot.edu",
+
+        isAdmin: true
+
+    };
+
+
+    updateNavbar();
+
+    showPage("portal");
+
+    renderSidebar();
+
+    renderTab("dashboard");
+
+
+    notify(
+        "Admin access granted."
+    );
+
+}
+
+
+function logout() {
+
+    currentUser = null;
+
+    updateNavbar();
+
+    showPage("landing");
+
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+function updateNavbar() {
+
+    const nav =
+        document.getElementById("navActions");
+
+
+    if (!currentUser) {
+
+        nav.innerHTML = `
+
+            <button
+                class="btn btn-secondary"
+                onclick="showPage('track')">
+
+                Track Grievance
+
+            </button>
+
+
+            <button
+                class="btn btn-primary"
+                onclick="showPage('login')">
+
+                Student Login
+
+            </button>
+
+
+            <button
+                class="btn btn-admin"
+                onclick="adminLogin()">
+
+                Admin Access
+
+            </button>
+
+        `;
+
+    }
+
+    else {
+
+        nav.innerHTML = `
+
+            <span
+                style="color:var(--muted);font-size:13px">
+
+                ${currentUser.isAdmin
+                    ? "👨‍💼 Admin"
+                    : "👤 " + currentUser.name}
+
+            </span>
+
+
+            <button
+                class="btn btn-secondary"
+                onclick="logout()">
+
+                Logout
+
+            </button>
+
+        `;
+
+    }
+
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+function renderSidebar() {
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+
+    let items;
+
+
+    if (currentUser.isAdmin) {
+
+        items = [
+
+            ["dashboard","📊","Dashboard"],
+
+            ["all","📋","All Grievances"],
+
+            ["reports","📈","Reports"]
+
+        ];
+
+    }
+
+    else {
+
+        items = [
+
+            ["dashboard","📊","Dashboard"],
+
+            ["submit","✏️","Submit Grievance"],
+
+            ["my","📋","My Grievances"]
+
+        ];
+
+    }
+
+
+    sidebar.innerHTML = `
+
+        <div class="sidebar-title">
+            Menu
+        </div>
+
+        ${items.map(item => `
+
+            <button
+                class="nav-item
+                ${currentTab === item[0]
+                    ? "active"
+                    : ""}"
+                onclick="renderTab('${item[0]}')">
+
+                <span>
+                    ${item[1]}
+                </span>
+
+                ${item[2]}
+
+            </button>
+
+        `).join("")}
+
+    `;
+
+}
+
+
+/* =====================================================
+   RENDER TAB
+===================================================== */
+
+function renderTab(tab) {
+
+    currentTab = tab;
+
+    renderSidebar();
+
+
+    const main =
+        document.getElementById("mainContent");
+
+
+    if (tab === "dashboard") {
+
+        main.innerHTML =
+            renderDashboard();
+
+    }
+
+    else if (tab === "submit") {
+
+        main.innerHTML =
+            renderSubmit();
+
+    }
+
+    else if (tab === "my") {
+
+        main.innerHTML =
+            renderGrievanceList(
+                myGrievances(),
+                false
+            );
+
+    }
+
+    else if (tab === "all") {
+
+        main.innerHTML =
+            renderGrievanceList(
+                grievances,
+                true
+            );
+
+    }
+
+    else if (tab === "reports") {
+
+        main.innerHTML =
+            renderReports();
+
+    }
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+function renderDashboard() {
+
+    const list =
+        myGrievances();
+
+    const stats =
+        getStats(list);
+
+
+    const isAdmin =
+        currentUser.isAdmin;
+
+
+    return `
+
+        <div class="page-header">
+
+            <h2>
+
+                ${
+                    isAdmin
+                    ? "Admin Dashboard"
+                    : "Hello, " +
+                      currentUser.name +
+                      " 👋"
+                }
+
+            </h2>
+
+            <p>
+
+                ${
+                    isAdmin
+                    ? "Manage and resolve student grievances."
+                    : "Roll No: " +
+                      currentUser.rollNo
+                }
+
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-stats">
+
+
+            <div class="dashboard-stat">
+
+                <div class="dashboard-stat-top">
+
+                    <span>📋</span>
+
+                    <span class="dashboard-value">
+                        ${stats.total}
+                    </span>
+
+                </div>
+
+                <div class="dashboard-label">
+                    Total
+                </div>
+
+                <div class="stat-line"></div>
+
+            </div>
+
+
+            <div class="dashboard-stat">
+
+                <div class="dashboard-stat-top">
+
+                    <span>⏳</span>
+
+                    <span class="dashboard-value">
+                        ${stats.pending}
+                    </span>
+
+                </div>
+
+                <div class="dashboard-label">
+                    Pending
+                </div>
+
+                <div
+                    class="stat-line"
+                    style="background:#F59E0B">
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-stat">
+
+                <div class="dashboard-stat-top">
+
+                    <span>🔄</span>
+
+                    <span class="dashboard-value">
+                        ${stats.progress}
+                    </span>
+
+                </div>
+
+                <div class="dashboard-label">
+                    In Progress
+                </div>
+
+                <div
+                    class="stat-line"
+                    style="background:#8B5CF6">
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-stat">
+
+                <div class="dashboard-stat-top">
+
+                    <span>✅</span>
+
+                    <span class="dashboard-value">
+                        ${stats.resolved}
+                    </span>
+
+                </div>
+
+                <div class="dashboard-label">
+                    Resolved
+                </div>
+
+                <div
+                    class="stat-line"
+                    style="background:#10B981">
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:15px;
+            ">
+
+            <h3
+                style="
+                    font-family:'Playfair Display',serif;
+                    color:white;
+                ">
+
+                Recent Grievances
+
+            </h3>
+
+
+            <button
+                class="btn btn-secondary"
+                onclick="
+                    renderTab(
+                        '${isAdmin ? "all" : "my"}'
+                    )
+                ">
+
+                View All →
+
+            </button>
+
+        </div>
+
+
+        <div class="grievance-list">
+
+            ${
+                list.length
+                ? list
+                    .slice(0,4)
+                    .map(
+                        g =>
+                        grievanceCard(g,isAdmin)
+                    )
+                    .join("")
+                : emptyState(!isAdmin)
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   SUBMIT FORM
+===================================================== */
+
+function renderSubmit() {
+
+    return `
+
+        <div class="page-header">
+
+            <h2>
+                Submit a Grievance
+            </h2>
+
+            <p>
+                Fill in the details below.
+            </p>
+
+        </div>
+
+
+        <div style="max-width:650px">
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Category *
+                </label>
+
+                <select
+                    class="form-select"
+                    id="category">
+
+                    <option value="">
+                        Select category
+                    </option>
+
+                    ${CATEGORIES.map(
+                        c =>
+                        `<option value="${c}">
+                            ${c}
+                        </option>`
+                    ).join("")}
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Priority
+                </label>
+
+                <select
+                    class="form-select"
+                    id="priority">
+
+                    <option>
+                        Medium
+                    </option>
+
+                    <option>
+                        High
+                    </option>
+
+                    <option>
+                        Low
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Grievance Title *
+                </label>
+
+                <input
+                    class="form-input"
+                    id="grievanceTitle"
+                    placeholder="Brief title of your complaint">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Description *
+                </label>
+
+                <textarea
+                    class="form-textarea"
+                    id="description"
+                    rows="6"
+                    placeholder="Describe your grievance in detail...">
+                </textarea>
+
+            </div>
+
+
+            <button
+                class="btn btn-primary"
+                onclick="submitGrievance()">
+
+                Submit Grievance →
+
+            </button>
+
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   GRIEVANCE CARD
+===================================================== */
+
+function statusClass(status) {
+
+    if (status === "Pending")
+        return "pending";
+
+    if (status === "Under Review")
+        return "review";
+
+    if (status === "In Progress")
+        return "progress";
+
+    if (status === "Resolved")
+        return "resolved";
+
+    if (status === "Rejected")
+        return "rejected";
+
+    return "pending";
+
+}
+
+
+function badge(status) {
+
+    return `
+
+        <span class="badge ${statusClass(status)}">
+
+            <span class="dot"></span>
+
+            ${status}
+
+        </span>
+
+    `;
+
+}
+
+
+function priorityHTML(priority) {
+
+    return `
+
+        <span class="${priority.toLowerCase()}">
+
+            ⚠ ${priority}
+
+        </span>
+
+    `;
+
+}
+
+
+function grievanceCard(g, showStudent) {
+
+    return `
+
+        <div
+            class="grievance-card"
+            onclick="openModal('${g.id}')">
+
+
+            <div class="grievance-top">
+
+                <div>
+
+                    <div class="grievance-id">
+                        ${g.id}
+                    </div>
+
+                    <div class="grievance-title">
+                        ${g.title}
+                    </div>
+
+                </div>
+
+                ${badge(g.status)}
+
+            </div>
+
+
+            <div class="grievance-meta">
+
+                <span>
+                    📁 ${g.category}
+                </span>
+
+
+                ${
+                    showStudent
+                    ? `
+                        <span>
+                            👤 ${g.studentName}
+                            (${g.rollNo})
+                        </span>
+                    `
+                    : ""
+                }
+
+
+                <span>
+                    📅 ${g.date}
+                </span>
+
+
+                <span>
+                    ${priorityHTML(g.priority)}
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   GRIEVANCE LIST
+===================================================== */
+
+function renderGrievanceList(list,isAdmin) {
+
+    return `
+
+        <div class="page-header">
+
+            <h2>
+                ${
+                    isAdmin
+                    ? "All Grievances"
+                    : "My Grievances"
+                }
+            </h2>
+
+            <p id="listCount">
+                ${list.length} records
+            </p>
+
+        </div>
+
+
+        ${
+            isAdmin
+            ? `
+
+                <div class="filters">
+
+                    <input
+                        class="form-input"
+                        id="search"
+                        placeholder="Search grievances..."
+                        oninput="filterGrievances()">
+
+
+                    <select
+                        class="form-select"
+                        id="statusFilter"
+                        onchange="filterGrievances()">
+
+                        <option>
+                            All
+                        </option>
+
+                        ${STATUS_LIST.map(
+                            s =>
+                            `<option>
+                                ${s}
+                            </option>`
+                        ).join("")}
+
+                    </select>
+
+                </div>
+
+            `
+            : ""
+        }
+
+
+        <div
+            class="grievance-list"
+            id="grievanceList">
+
+            ${
+                list.length
+                ? list
+                    .map(
+                        g =>
+                        grievanceCard(
+                            g,
+                            isAdmin
+                        )
+                    )
+                    .join("")
+                : emptyState(!isAdmin)
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+function filterGrievances() {
+
+    const search =
+        document
+        .getElementById("search")
+        .value
+        .toLowerCase();
+
+
+    const status =
+        document
+        .getElementById("statusFilter")
+        .value;
+
+
+    const filtered =
+        grievances.filter(g => {
+
+            const searchMatch =
+                !search ||
+                g.id.toLowerCase().includes(search) ||
+                g.studentName.toLowerCase().includes(search) ||
+                g.title.toLowerCase().includes(search);
+
+
+            const statusMatch =
+                status === "All" ||
+                g.status === status;
+
+
+            return searchMatch && statusMatch;
+
+        });
+
+
+    document
+        .getElementById("grievanceList")
+        .innerHTML =
+        filtered.length
+        ? filtered
+            .map(g => grievanceCard(g,true))
+            .join("")
+        : emptyState(false);
+
+
+    document
+        .getElementById("listCount")
+        .textContent =
+        filtered.length + " records";
+
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+function emptyState(canSubmit) {
+
+    return `
+
+        <div class="empty">
+
+            <div class="empty-icon">
+                📭
+            </div>
+
+            <p>
+                No grievances found.
+            </p>
+
+            ${
+                canSubmit
+                ? `
+                    <br>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="renderTab('submit')">
+
+                        Submit your first grievance
+
+                    </button>
+                `
+                : ""
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   OPEN MODAL
+===================================================== */
+
+function openModal(id) {
+
+    const grievance =
+        grievances.find(
+            g => g.id === id
+        );
+
+
+    if (!grievance)
+        return;
+
+
+    document.getElementById("modalId")
+        .textContent = grievance.id;
+
+
+    document.getElementById("modalTitle")
+        .textContent = grievance.title;
+
+
+    document.getElementById("modalMeta")
+        .innerHTML = `
+
+            ${badge(grievance.status)}
+
+            <span class="meta">
+                📁 ${grievance.category}
+            </span>
+
+            <span class="meta">
+                👤 ${grievance.studentName}
+            </span>
+
+            <span class="meta">
+                📅 ${grievance.date}
+            </span>
+
+            <span class="meta">
+                ⚠ ${grievance.priority}
+            </span>
+
+        `;
+
+
+    document.getElementById("modalDescription")
+        .textContent =
+        grievance.description;
+
+
+    document.getElementById("modalAdminNote")
+        .innerHTML =
+        grievance.adminNote
+        ? `
+
+            <div class="admin-note">
+
+                <strong>
+                    Admin Response
+                </strong>
+
+                ${grievance.adminNote}
+
+            </div>
+
+        `
+        : "";
+
+
+    const update =
+        document.getElementById("modalUpdate");
+
+
+    if (currentUser &&
+        currentUser.isAdmin) {
+
+        update.innerHTML = `
+
+            <hr
+                style="
+                    border:none;
+                    border-top:1px solid var(--border);
+                    margin:25px 0;
+                ">
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Update Status
+                </label>
+
+                <select
+                    class="form-select"
+                    id="updateStatus">
+
+                    ${STATUS_LIST.map(
+                        s => `
+
+                        <option
+                            ${s === grievance.status
+                                ? "selected"
+                                : ""}>
+
+                            ${s}
+
+                        </option>
+
+                    `
+                    ).join("")}
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Admin Note
+                </label>
+
+                <textarea
+                    class="form-textarea"
+                    id="adminNote"
+                    rows="4">${grievance.adminNote}</textarea>
+
+            </div>
+
+
+            <button
+                class="btn btn-primary"
+                onclick="
+                    saveGrievance('${grievance.id}')
+                ">
+
+                Save Changes
+
+            </button>
+
+        `;
+
+    }
+
+    else {
+
+        update.innerHTML = "";
+
+    }
+
+
+    document
+        .getElementById("modal")
+        .classList.add("open");
+
+}
+
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeModal(event) {
+
+    if (
+        !event ||
+        event.target ===
+        document.getElementById("modal")
+    ) {
+
+        document
+            .getElementById("modal")
+            .classList.remove("open");
+
+    }
+
+}
+
+
+/* =====================================================
+   ADMIN UPDATE
+===================================================== */
+
+function saveGrievance(id) {
+
+    const grievance =
+        grievances.find(
+            g => g.id === id
+        );
+
+
+    if (!grievance)
+        return;
+
+
+    grievance.status =
+        document
+        .getElementById("updateStatus")
+        .value;
+
+
+    grievance.adminNote =
+        document
+        .getElementById("adminNote")
+        .value;
+
+
+    document
+        .getElementById("modal")
+        .classList.remove("open");
+
+
+    renderTab(currentTab);
+
+    updateLandingStats();
+
+
+    notify(
+        "Grievance updated successfully!"
+    );
+
+}
+
+
+/* =====================================================
+   SUBMIT GRIEVANCE
+===================================================== */
+
+function submitGrievance() {
+
+    const category =
+        document
+        .getElementById("category")
+        .value;
+
+
+    const priority =
+        document
+        .getElementById("priority")
+        .value;
+
+
+    const title =
+        document
+        .getElementById("grievanceTitle")
+        .value.trim();
+
+
+    const description =
+        document
+        .getElementById("description")
+        .value.trim();
+
+
+    if (
+        !category ||
+        !title ||
+        !description
+    ) {
+
+        notify(
+            "Please fill all required fields.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const id =
+        "SOT-2024-" +
+        String(idCounter++)
+        .padStart(3,"0");
+
+
+    grievances.unshift({
+
+        id: id,
+
+        studentName:
+        currentUser.name,
+
+        rollNo:
+        currentUser.rollNo,
+
+        category:
+        category,
+
+        title:
+        title,
+
+        description:
+        description,
+
+        status:
+        "Pending",
+
+        date:
+        new Date()
+        .toISOString()
+        .split("T")[0],
+
+        adminNote:
+        "",
+
+        priority:
+        priority
+
+    });
+
+
+    notify(
+        "Grievance submitted! ID: " + id
+    );
+
+
+    updateLandingStats();
+
+
+    renderTab("my");
+
+}
+
+
+/* =====================================================
+   TRACK GRIEVANCE
+===================================================== */
+
+function renderSampleButtons() {
+
+    document
+        .getElementById("sampleButtons")
+        .innerHTML =
+
+        grievances
+        .slice(0,5)
+        .map(g => `
+
+            <button
+                onclick="
+                    quickTrack('${g.id}')
+                ">
+
+                ${g.id}
+
+            </button>
+
+        `)
+        .join("");
+
+}
+
+
+function quickTrack(id) {
+
+    document
+        .getElementById("trackInput")
+        .value = id;
+
+
+    trackGrievance();
+
+}
+
+
+function trackGrievance() {
+
+    const id =
+        document
+        .getElementById("trackInput")
+        .value
+        .trim();
+
+
+    const grievance =
+        grievances.find(
+            g => g.id === id
+        );
+
+
+    const result =
+        document
+        .getElementById("trackResult");
+
+
+    if (!grievance) {
+
+        result.innerHTML = `
+
+            <div class="not-found">
+
+                ❌ No grievance found
+                with ID
+
+                <strong>
+                    ${id || "(blank)"}
+                </strong>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    result.innerHTML = `
+
+        <div
+            class="grievance-card"
+            style="
+                cursor:default;
+                margin-top:20px;
+            ">
+
+
+            <div class="grievance-top">
+
+                <div>
+
+                    <div class="grievance-id">
+                        ${grievance.id}
+                    </div>
+
+                    <div class="grievance-title">
+                        ${grievance.title}
+                    </div>
+
+                </div>
+
+                ${badge(grievance.status)}
+
+            </div>
+
+
+            <div class="grievance-meta">
+
+                <span>
+                    📁 ${grievance.category}
+                </span>
+
+                <span>
+                    👤 ${grievance.studentName}
+                </span>
+
+                <span>
+                    📅 ${grievance.date}
+                </span>
+
+                <span>
+                    ${priorityHTML(
+                        grievance.priority
+                    )}
+                </span>
+
+            </div>
+
+
+            <p
+                style="
+                    color:#8BA8C4;
+                    line-height:1.7;
+                    margin-top:15px;
+                    font-size:14px;
+                ">
+
+                ${grievance.description}
+
+            </p>
+
+
+            ${
+                grievance.adminNote
+                ? `
+
+                    <div
+                        class="admin-note"
+                        style="margin-top:15px">
+
+                        <strong>
+                            Admin Response
+                        </strong>
+
+                        ${grievance.adminNote}
+
+                    </div>
+
+                `
+                : ""
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   REPORTS
+===================================================== */
+
+function renderReports() {
+
+    const total =
+        grievances.length || 1;
+
+
+    const categoryCounts = {};
+
+
+    CATEGORIES.forEach(category => {
+
+        categoryCounts[category] =
+            grievances.filter(
+                g => g.category === category
+            ).length;
+
+    });
+
+
+    const statusCounts = {};
+
+
+    STATUS_LIST.forEach(status => {
+
+        statusCounts[status] =
+            grievances.filter(
+                g => g.status === status
+            ).length;
+
+    });
+
+
+    return `
+
+        <div class="page-header">
+
+            <h2>
+                Reports & Analytics
+            </h2>
+
+            <p>
+                Insights across all
+                ${grievances.length}
+                grievances.
+            </p>
+
+        </div>
+
+
+        <div class="reports">
+
+
+            <div class="report-card">
+
+                <h3>
+                    📁 By Category
+                </h3>
+
+                ${CATEGORIES
+                    .filter(
+                        c =>
+                        categoryCounts[c] > 0
+                    )
+                    .map(
+                        category => `
+
+                        <div class="bar-row">
+
+                            <div class="bar-info">
+
+                                <span>
+                                    ${category}
+                                </span>
+
+                                <span>
+                                    ${categoryCounts[category]}
+                                </span>
+
+                            </div>
+
+                            <div class="bar">
+
+                                <div
+                                    class="bar-fill"
+                                    style="
+                                        width:
+                                        ${
+                                            categoryCounts[category]
+                                            /
+                                            total
+                                            * 100
+                                        }%
+                                    ">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `
+                    )
+                    .join("")}
+
+            </div>
+
+
+            <div class="report-card">
+
+                <h3>
+                    📊 By Status
+                </h3>
+
+                ${STATUS_LIST.map(
+                    status => `
+
+                    <div class="bar-row">
+
+                        <div class="bar-info">
+
+                            <span>
+                                ${status}
+                            </span>
+
+                            <span>
+                                ${statusCounts[status]}
+                            </span>
+
+                        </div>
+
+                        <div class="bar">
+
+                            <div
+                                class="bar-fill"
+                                style="
+                                    width:
+                                    ${
+                                        statusCounts[status]
+                                        /
+                                        total
+                                        * 100
+                                    }%;
+                                ">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `
+                ).join("")}
+
+            </div>
+
+
+            <div class="report-card full">
+
+                <h3>
+                    ⚠️ Priority Distribution
+                </h3>
+
+
+                <div class="priority-grid">
+
+
+                    <div class="priority-box">
+
+                        <div
+                            class="priority-number"
+                            style="color:#F87171">
+
+                            ${
+                                grievances.filter(
+                                    g =>
+                                    g.priority === "High"
+                                ).length
+                            }
+
+                        </div>
+
+                        <div
+                            class="priority-label"
+                            style="color:#F87171">
+
+                            High Priority
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="priority-box">
+
+                        <div
+                            class="priority-number"
+                            style="color:#FBBF24">
+
+                            ${
+                                grievances.filter(
+                                    g =>
+                                    g.priority === "Medium"
+                                ).length
+                            }
+
+                        </div>
+
+                        <div
+                            class="priority-label"
+                            style="color:#FBBF24">
+
+                            Medium Priority
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="priority-box">
+
+                        <div
+                            class="priority-number"
+                            style="color:#34D399">
+
+                            ${
+                                grievances.filter(
+                                    g =>
+                                    g.priority === "Low"
+                                ).length
+                            }
+
+                        </div>
+
+                        <div
+                            class="priority-label"
+                            style="color:#34D399">
+
+                            Low Priority
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+===================================================== */
+
+updateLandingStats();
+
+</script>
+
+</body>
+</html>
