@@ -1,0 +1,1056 @@
+# ============================================================
+# SOT GRIEVANCE MANAGEMENT SYSTEM — COMPLETE BACKEND
+# ============================================================
+#
+# Single-file FastAPI backend
+#
+# Includes:
+#
+# 1. Database
+# 2. Database Models
+# 3. Pydantic Schemas
+# 4. Auth (Password Hashing + JWT)
+# 5. Grievance ID Generation
+# 6. Grievance Service Functions
+# 7. Analytics / Reports Service
+# 8. API Routes — Auth
+# 9. API Routes — Grievances (Student)
+# 10. API Routes — Grievances (Admin)
+# 11. API Routes — Reports
+# 12. FastAPI Application
+#
+# ============================================================
+
+
+# ============================================================
+# 1. IMPORTS
+# ============================================================
+
+from datetime import datetime, timedelta
+from typing import Optional, List, Literal
+
+import os
+
+from fastapi import (
+    FastAPI,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+)
+
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
+
+from pydantic import BaseModel, EmailStr, Field
+
+from sqlalchemy import (
+    create_engine,
+    Column,
+    String,
+    Text,
+    Boolean,
+    DateTime,
+)
+
+from sqlalchemy.orm import (
+    declarative_base,
+    sessionmaker,
+    Session,
+)
+
+from sqlalchemy.sql import func
+
+from jose import JWTError, jwt
+
+from passlib.context import CryptContext
+
+
+# ============================================================
+# 2. APPLICATION CONFIGURATION
+# ============================================================
+
+APP_NAME = "SOT Grievance Management System API"
+
+APP_VERSION = "1.0.0"
+
+DATABASE_URL = "sqlite:///./grievance.db"
+
+SECRET_KEY = os.environ.get(
+    "GRIEVANCE_SECRET_KEY",
+    "change-this-in-production",
+)
+
+ALGORITHM = "HS256"
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12
+
+
+# ============================================================
+# 3. DATABASE CONFIGURATION
+# ============================================================
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={
+        "check_same_thread": False
+    }
+)
+
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+
+Base = declarative_base()
+
+
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+
+        yield db
+
+    finally:
+
+        db.close()
+
+
+# ============================================================
+# 4. DATABASE TABLE — USERS
+# ============================================================
+
+class User(Base):
+
+    __tablename__ = "users"
+
+    id = Column(
+        String,
+        primary_key=True,
+        index=True,
+    )
+
+    name = Column(
+        String,
+        nullable=False,
+    )
+
+    roll_no = Column(
+        String,
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+
+    email = Column(
+        String,
+        nullable=False,
+    )
+
+    hashed_password = Column(
+        String,
+        nullable=False,
+    )
+
+    is_admin = Column(
+        Boolean,
+        default=False,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+
+
+# ============================================================
+# 5. DATABASE TABLE — GRIEVANCES
+# ============================================================
+
+class Grievance(Base):
+
+    __tablename__ = "grievances"
+
+    id = Column(
+        String,
+        primary_key=True,
+        index=True,
+    )
+
+    student_name = Column(
+        String,
+        nullable=False,
+    )
+
+    roll_no = Column(
+        String,
+        index=True,
+        nullable=False,
+    )
+
+    category = Column(
+        String,
+        nullable=False,
+    )
+
+    title = Column(
+        String,
+        nullable=False,
+    )
+
+    description = Column(
+        Text,
+        nullable=False,
+    )
+
+    status = Column(
+        String,
+        default="Pending",
+    )
+
+    priority = Column(
+        String,
+        default="Medium",
+    )
+
+    admin_note = Column(
+        Text,
+        default="",
+    )
+
+    date_submitted = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+
+    date_updated = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+    )
+
+
+# ============================================================
+# 6. CREATE DATABASE TABLES
+# ============================================================
+
+Base.metadata.create_all(
+    bind=engine
+)
+
+
+# ============================================================
+# 7. CONSTANTS — CATEGORIES AND STATUSES
+# ============================================================
+
+CATEGORIES = [
+
+    "Academic",
+
+    "Administrative",
+
+    "Examination",
+
+    "Faculty",
+
+    "Infrastructure",
+
+    "Financial",
+
+    "Personal",
+
+    "Other",
+
+]
+
+
+STATUS_LIST = [
+
+    "Pending",
+
+    "Under Review",
+
+    "In Progress",
+
+    "Resolved",
+
+    "Rejected",
+
+]
+
+
+PriorityType = Literal["High", "Medium", "Low"]
+
+StatusType = Literal["Pending", "Under Review", "In Progress", "Resolved", "Rejected"]
+
+
+# ============================================================
+# 8. PYDANTIC SCHEMA — STUDENT SIGNUP
+# ============================================================
+
+class StudentSignup(BaseModel):
+
+    name: str
+
+    roll_no: str
+
+    email: EmailStr
+
+    password: str = Field(
+        min_length=6,
+    )
+
+
+# ============================================================
+# 9. PYDANTIC SCHEMA — LOGIN
+# ============================================================
+
+class LoginRequest(BaseModel):
+
+    roll_no: str
+
+    password: str
+
+
+# ============================================================
+# 10. PYDANTIC SCHEMA — TOKEN RESPONSE
+# ============================================================
+
+class TokenResponse(BaseModel):
+
+    access_token: str
+
+    token_type: str = "bearer"
+
+    is_admin: bool
+
+    name: str
+
+
+# ============================================================
+# 11. PYDANTIC SCHEMA — GRIEVANCE CREATE
+# ============================================================
+
+class GrievanceCreate(BaseModel):
+
+    category: str
+
+    title: str
+
+    description: str
+
+    priority: PriorityType = "Medium"
+
+
+# ============================================================
+# 12. PYDANTIC SCHEMA — GRIEVANCE UPDATE
+# ============================================================
+
+class GrievanceUpdate(BaseModel):
+
+    status: Optional[StatusType] = None
+
+    admin_note: Optional[str] = None
+
+
+# ============================================================
+# 13. PYDANTIC SCHEMA — GRIEVANCE OUTPUT
+# ============================================================
+
+class GrievanceOut(BaseModel):
+
+    id: str
+
+    student_name: str
+
+    roll_no: str
+
+    category: str
+
+    title: str
+
+    description: str
+
+    status: str
+
+    priority: str
+
+    admin_note: str
+
+    date_submitted: datetime
+
+    date_updated: Optional[datetime] = None
+
+    class Config:
+
+        from_attributes = True
+
+
+# ============================================================
+# 14. PYDANTIC SCHEMA — STATS OUTPUT
+# ============================================================
+
+class StatsOut(BaseModel):
+
+    total: int
+
+    pending: int
+
+    in_progress: int
+
+    resolved: int
+
+    by_category: dict
+
+    by_status: dict
+
+    by_priority: dict
+
+
+# ============================================================
+# 15. AUTH — PASSWORD HASHING
+# ============================================================
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+)
+
+
+def hash_password(password: str) -> str:
+
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+# ============================================================
+# 16. AUTH — JWT TOKEN CREATION
+# ============================================================
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="auth/login"
+)
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    to_encode.update({"exp": expire})
+
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+# ============================================================
+# 17. AUTH — CURRENT USER DEPENDENCY
+# ============================================================
+
+def get_current_user(
+
+    token: str = Depends(oauth2_scheme),
+
+    db: Session = Depends(get_db),
+
+) -> User:
+
+    credentials_exception = HTTPException(
+
+        status_code=status.HTTP_401_UNAUTHORIZED,
+
+        detail="Could not validate credentials",
+
+        headers={"WWW-Authenticate": "Bearer"},
+
+    )
+
+    try:
+
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+        roll_no: str = payload.get("sub")
+
+        if roll_no is None:
+
+            raise credentials_exception
+
+    except JWTError:
+
+        raise credentials_exception
+
+
+    user = (
+
+        db.query(User)
+
+        .filter(User.roll_no == roll_no)
+
+        .first()
+
+    )
+
+    if user is None:
+
+        raise credentials_exception
+
+    return user
+
+
+# ============================================================
+# 18. AUTH — ADMIN-ONLY DEPENDENCY
+# ============================================================
+
+def require_admin(user: User = Depends(get_current_user)) -> User:
+
+    if not user.is_admin:
+
+        raise HTTPException(
+
+            status_code=status.HTTP_403_FORBIDDEN,
+
+            detail="Admin access required",
+
+        )
+
+    return user
+
+
+# ============================================================
+# 19. SERVICE — GENERATE GRIEVANCE ID
+# ============================================================
+
+def generate_grievance_id(db: Session) -> str:
+
+    year = datetime.now().year
+
+    count = db.query(Grievance).count() + 1
+
+    return f"SOT-{year}-{count:03d}"
+
+
+# ============================================================
+# 20. SERVICE — SUBMIT GRIEVANCE
+# ============================================================
+
+def submit_grievance_record(db: Session, payload: GrievanceCreate, user: User) -> Grievance:
+
+    if payload.category not in CATEGORIES:
+
+        raise HTTPException(
+
+            status_code=400,
+
+            detail=f"Category must be one of {CATEGORIES}",
+
+        )
+
+
+    grievance = Grievance(
+
+        id=generate_grievance_id(db),
+
+        student_name=user.name,
+
+        roll_no=user.roll_no,
+
+        category=payload.category,
+
+        title=payload.title,
+
+        description=payload.description,
+
+        status="Pending",
+
+        priority=payload.priority,
+
+        admin_note="",
+
+    )
+
+    db.add(grievance)
+
+    db.commit()
+
+    db.refresh(grievance)
+
+    return grievance
+
+
+# ============================================================
+# 21. SERVICE — FILTER AND SEARCH GRIEVANCES
+# ============================================================
+
+def filter_grievances(db: Session, status_filter: Optional[str], search: Optional[str]) -> List[Grievance]:
+
+    query = db.query(Grievance)
+
+    if status_filter and status_filter != "All":
+
+        query = query.filter(Grievance.status == status_filter)
+
+    if search:
+
+        like = f"%{search}%"
+
+        query = query.filter(
+
+            (Grievance.id.ilike(like))
+
+            | (Grievance.student_name.ilike(like))
+
+            | (Grievance.title.ilike(like))
+
+        )
+
+    return (
+
+        query
+
+        .order_by(Grievance.date_submitted.desc())
+
+        .all()
+
+    )
+
+
+# ============================================================
+# 22. SERVICE — UPDATE GRIEVANCE
+# ============================================================
+
+def update_grievance_record(db: Session, grievance_id: str, payload: GrievanceUpdate) -> Grievance:
+
+    grievance = (
+
+        db.query(Grievance)
+
+        .filter(Grievance.id == grievance_id)
+
+        .first()
+
+    )
+
+    if not grievance:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="Grievance not found",
+
+        )
+
+    if payload.status is not None:
+
+        grievance.status = payload.status
+
+    if payload.admin_note is not None:
+
+        grievance.admin_note = payload.admin_note
+
+    db.commit()
+
+    db.refresh(grievance)
+
+    return grievance
+
+
+# ============================================================
+# 23. SERVICE — REPORTS AND ANALYTICS
+# ============================================================
+
+def build_stats(db: Session) -> StatsOut:
+
+    all_grievances = db.query(Grievance).all()
+
+    total = len(all_grievances)
+
+
+    by_category = {
+
+        c: sum(1 for g in all_grievances if g.category == c)
+
+        for c in CATEGORIES
+
+    }
+
+    by_category = {k: v for k, v in by_category.items() if v > 0}
+
+
+    by_status = {
+
+        s: sum(1 for g in all_grievances if g.status == s)
+
+        for s in STATUS_LIST
+
+    }
+
+    by_priority = {
+
+        p: sum(1 for g in all_grievances if g.priority == p)
+
+        for p in ["High", "Medium", "Low"]
+
+    }
+
+    return StatsOut(
+
+        total=total,
+
+        pending=by_status.get("Pending", 0),
+
+        in_progress=by_status.get("In Progress", 0) + by_status.get("Under Review", 0),
+
+        resolved=by_status.get("Resolved", 0),
+
+        by_category=by_category,
+
+        by_status=by_status,
+
+        by_priority=by_priority,
+
+    )
+
+
+# ============================================================
+# 24. FASTAPI APPLICATION
+# ============================================================
+
+app = FastAPI(
+
+    title=APP_NAME,
+
+    description="Backend for the SOT Grievance Student System",
+
+    version=APP_VERSION,
+
+)
+
+
+app.add_middleware(
+
+    CORSMiddleware,
+
+    allow_origins=["*"],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"],
+
+)
+
+
+# ============================================================
+# 25. ROUTE — HEALTH CHECK
+# ============================================================
+
+@app.get("/")
+def health_check():
+
+    return {
+
+        "status": "ok",
+
+        "service": APP_NAME,
+
+    }
+
+
+# ============================================================
+# 26. ROUTE — STUDENT SIGNUP
+# ============================================================
+
+@app.post("/auth/signup", response_model=TokenResponse)
+def signup(
+
+    payload: StudentSignup,
+
+    db: Session = Depends(get_db),
+
+):
+
+    existing = (
+
+        db.query(User)
+
+        .filter(User.roll_no == payload.roll_no)
+
+        .first()
+
+    )
+
+    if existing:
+
+        raise HTTPException(
+
+            status_code=400,
+
+            detail="A user with this roll number already exists",
+
+        )
+
+
+    user = User(
+
+        id=payload.roll_no,
+
+        name=payload.name,
+
+        roll_no=payload.roll_no,
+
+        email=payload.email,
+
+        hashed_password=hash_password(payload.password),
+
+        is_admin=False,
+
+    )
+
+    db.add(user)
+
+    db.commit()
+
+
+    token = create_access_token({"sub": user.roll_no})
+
+    return TokenResponse(
+
+        access_token=token,
+
+        is_admin=False,
+
+        name=user.name,
+
+    )
+
+
+# ============================================================
+# 27. ROUTE — LOGIN
+# ============================================================
+
+@app.post("/auth/login", response_model=TokenResponse)
+def login(
+
+    payload: LoginRequest,
+
+    db: Session = Depends(get_db),
+
+):
+
+    user = (
+
+        db.query(User)
+
+        .filter(User.roll_no == payload.roll_no)
+
+        .first()
+
+    )
+
+    if not user or not verify_password(payload.password, user.hashed_password):
+
+        raise HTTPException(
+
+            status_code=401,
+
+            detail="Invalid roll number or password",
+
+        )
+
+
+    token = create_access_token({"sub": user.roll_no})
+
+    return TokenResponse(
+
+        access_token=token,
+
+        is_admin=user.is_admin,
+
+        name=user.name,
+
+    )
+
+
+# ============================================================
+# 28. ROUTE — SUBMIT GRIEVANCE
+# ============================================================
+
+@app.post("/grievances", response_model=GrievanceOut, status_code=201)
+def submit_grievance(
+
+    payload: GrievanceCreate,
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(get_current_user),
+
+):
+
+    return submit_grievance_record(db, payload, current_user)
+
+
+# ============================================================
+# 29. ROUTE — MY GRIEVANCES
+# ============================================================
+
+@app.get("/grievances/mine", response_model=List[GrievanceOut])
+def my_grievances(
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(get_current_user),
+
+):
+
+    return (
+
+        db.query(Grievance)
+
+        .filter(Grievance.roll_no == current_user.roll_no)
+
+        .order_by(Grievance.date_submitted.desc())
+
+        .all()
+
+    )
+
+
+# ============================================================
+# 30. ROUTE — TRACK GRIEVANCE (PUBLIC)
+# ============================================================
+
+@app.get("/grievances/track/{grievance_id}", response_model=GrievanceOut)
+def track_grievance(
+
+    grievance_id: str,
+
+    db: Session = Depends(get_db),
+
+):
+
+    grievance = (
+
+        db.query(Grievance)
+
+        .filter(Grievance.id == grievance_id)
+
+        .first()
+
+    )
+
+    if not grievance:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="No grievance found with that ID",
+
+        )
+
+    return grievance
+
+
+# ============================================================
+# 31. ROUTE — LIST / FILTER ALL GRIEVANCES (ADMIN)
+# ============================================================
+
+@app.get("/grievances", response_model=List[GrievanceOut])
+def list_all_grievances(
+
+    status_filter: Optional[str] = Query(None, alias="status"),
+
+    search: Optional[str] = Query(None),
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(require_admin),
+
+):
+
+    return filter_grievances(db, status_filter, search)
+
+
+# ============================================================
+# 32. ROUTE — UPDATE GRIEVANCE (ADMIN)
+# ============================================================
+
+@app.patch("/grievances/{grievance_id}", response_model=GrievanceOut)
+def update_grievance(
+
+    grievance_id: str,
+
+    payload: GrievanceUpdate,
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(require_admin),
+
+):
+
+    return update_grievance_record(db, grievance_id, payload)
+
+
+# ============================================================
+# 33. ROUTE — REPORTS AND ANALYTICS (ADMIN)
+# ============================================================
+
+@app.get("/reports/stats", response_model=StatsOut)
+def get_stats(
+
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(require_admin),
+
+):
+
+    return build_stats(db)
+
+
+# ============================================================
+# 34. SERVER ENTRY POINT
+# ============================================================
+#
+# Run this file directly with:
+#
+# python backend.py
+#
+# Or preferably:
+#
+# uvicorn backend:app --reload
+#
+# ============================================================
+
+if __name__ == "__main__":
+
+    import uvicorn
+
+
+    uvicorn.run(
+
+        "backend:app",
+
+        host="127.0.0.1",
+
+        port=8000,
+
+        reload=True,
+
+    )
+
+
+# ============================================================
+# END OF BACKEND
+# ============================================================
