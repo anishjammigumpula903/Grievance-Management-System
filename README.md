@@ -1,20 +1,18 @@
-# Grievance-Management-System
-A full-stack grievance management platform for submitting, tracking, and resolving user grievances, with secure authentication and real-time status tracking.
 # SOT Grievance Management System
 
-A student grievance management platform that lets students submit, track, and manage 
-complaints digitally, while giving administrators a centralized dashboard to review, 
-update, and resolve grievances in real time.
+A student grievance management platform that lets students submit, track, and manage complaints digitally, while giving administrators a centralized dashboard to review, update, and resolve grievances in real time.
 
-The system provides role-based portals (Student & Admin), unique grievance tracking IDs, 
-category/priority classification, and a live analytics dashboard for institutional insights.
+The system provides role-based portals (Student & Admin), unique grievance tracking IDs, category/priority classification, and a live analytics dashboard for institutional insights.
+
+![Status](https://img.shields.io/badge/status-in--progress-yellow)
+![Frontend](https://img.shields.io/badge/frontend-HTML%2FCSS%2FJS-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
 ## 🚀 Project Overview
 
-Traditional grievance redressal in colleges often relies on physical complaint boxes, 
-emails, or informal reporting — leading to lost records, no tracking, and delayed resolution.
+Traditional grievance redressal in colleges often relies on physical complaint boxes, emails, or informal reporting — leading to lost records, no tracking, and delayed resolution.
 
 This project aims to build a digital grievance platform that can:
 
@@ -41,34 +39,45 @@ This project aims to build a digital grievance platform that can:
 ---
 
 ## 🏗️ System Overview
-┌──────────────────────┐
-                │   Student / Admin     │
-                │       Login           │
-                └──────────┬────────────┘
-                           │
-            ┌──────────────┼──────────────┐
-            │                             │
-            ▼                             ▼
-   ┌────────────────┐           ┌────────────────┐
-   │ Student Portal  │           │  Admin Portal   │
-   │ - Submit         │           │ - All Grievances│
-   │ - My Grievances  │           │ - Filter/Search  │
-   │ - Track by ID     │           │ - Update Status  │
-   └────────┬────────┘           └────────┬────────┘
-            │                             │
-            └──────────────┬──────────────┘
-                           ▼
-                ┌──────────────────────┐
-                │  Grievance Data Store │
-                │ (In-memory / JS state)│
-                └──────────┬────────────┘
-                           ▼
-                ┌──────────────────────┐
-                │  Reports & Analytics  │
-                │ By Category / Status /│
-                │      Priority         │
-                └──────────────────────┘
-                ---
+
+```mermaid
+flowchart TD
+    A["Student / Admin Login"] --> B["Student Portal"]
+    A --> C["Admin Portal"]
+
+    B --> B1["Submit Grievance"]
+    B --> B2["My Grievances"]
+    B --> B3["Track by ID"]
+
+    C --> C1["View All Grievances"]
+    C --> C2["Filter / Search"]
+    C --> C3["Update Status"]
+
+    B1 --> D[("Grievance Data Store<br/>In-memory / JS state")]
+    B2 --> D
+    B3 --> D
+    C1 --> D
+    C2 --> D
+    C3 --> D
+
+    D --> E["Reports & Analytics<br/>By Category / Status / Priority"]
+```
+
+> Renders automatically on GitHub — no image export needed. If you prefer a static image, generate one at [mermaid.live](https://mermaid.live) and drop it in `/screenshots`.
+
+---
+
+## 🔄 Grievance Status Lifecycle
+
+| Status | Meaning |
+|---|---|
+| **Pending** | Grievance submitted, not yet reviewed |
+| **Under Review** | Admin has opened and is assessing it |
+| **In Progress** | Action is actively being taken |
+| **Resolved** | Issue closed with a resolution note |
+| **Rejected** | Grievance closed without action, with a reason |
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -95,8 +104,67 @@ This project aims to build a digital grievance platform that can:
 
 ---
 
+## 📁 Project Structure
+
+```
+Grievance-Management-System/
+├── Backend/            # API layer (planned/in-progress)
+├── frontend/           # HTML, CSS, JS application
+├── screenshots/        # UI screenshots for README/demo
+└── README.md
+```
+
+---
+
+## ⚙️ Getting Started
+
+**Prerequisites**
+- A modern browser (Chrome, Edge, Firefox)
+- (Optional) [Node.js](https://nodejs.org/) if you're running the backend locally
+
+**Run locally**
+
+```bash
+# Clone the repo
+git clone https://github.com/anishjammigumpula903/Grievance-Management-System.git
+cd Grievance-Management-System/frontend
+
+# Open directly in browser
+open index.html
+# or serve it locally
+npx serve .
+```
+
+Since the current version runs entirely on frontend state, no build step or backend setup is required to try it out.
+
+---
+
+## 📸 Screenshots
+
+> Add screenshots from the `/screenshots` folder here, e.g.:
+> `![Student Portal](screenshots/student-portal.png)`
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Node.js/Express (or FastAPI) backend with REST API
+- [ ] MongoDB/MySQL persistence layer
+- [ ] JWT-based authentication for students and admins
+- [ ] Email notifications on status change
+- [ ] Exportable analytics reports (PDF/CSV)
+- [ ] Deployment (Render/Vercel + hosted DB)
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome. Feel free to open an issue or submit a pull request.
+
 ## 📌 Note
 
-This version runs entirely on the frontend using in-memory JavaScript state — grievance 
-data resets on page reload. Backend integration for persistent storage is planned as a 
-next step.
+This version runs entirely on the frontend using in-memory JavaScript state — grievance data resets on page reload. Backend integration for persistent storage is planned as a next step.
+
+## 📄 License
+
+This project is licensed under the MIT License.
